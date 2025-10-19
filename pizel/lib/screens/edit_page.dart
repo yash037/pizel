@@ -21,7 +21,6 @@ class _CameraPageState extends State<CameraPage> {
         _images.add(File(image.path));
       });
 
-      // Navigate to edit page after capturing
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -34,9 +33,7 @@ class _CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Camera Page'),
-      ),
+      appBar: AppBar(title: const Text('Camera Page')),
       body: Center(
         child: ElevatedButton.icon(
           onPressed: _captureImage,
@@ -60,7 +57,8 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
-  List<File> editedImages = [];
+  int currentIndex = 0;
+  late List<File> editedImages;
 
   @override
   void initState() {
@@ -68,79 +66,152 @@ class _EditPageState extends State<EditPage> {
     editedImages = widget.images;
   }
 
-  Future<void> _cropImage(int index) async {
+  Future<void> _cropImage() async {
     final cropped = await ImageCropper().cropImage(
-      sourcePath: editedImages[index].path,
-      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      sourcePath: editedImages[currentIndex].path,
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Crop Image',
-          toolbarColor: Colors.deepPurple,
+          toolbarColor: Colors.black,
           toolbarWidgetColor: Colors.white,
-          initAspectRatio: CropAspectRatioPreset.square,
-          lockAspectRatio: true,
-        ),
-        IOSUiSettings(
-          minimumAspectRatio: 1.0,
-          aspectRatioLockEnabled: true,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.ratio3x2,
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.ratio4x3,
-            CropAspectRatioPreset.ratio16x9,
-          ],
+          lockAspectRatio: false,
         ),
       ],
     );
-
     if (cropped != null) {
+      setState(() => editedImages[currentIndex] = File(cropped.path));
+    }
+  }
+
+  void _nextImage() {
+    if (currentIndex < editedImages.length - 1) {
+      setState(() => currentIndex++);
+    }
+  }
+
+  void _previousImage() {
+    if (currentIndex > 0) {
+      setState(() => currentIndex--);
+    }
+  }
+
+  void _addNewImage() async {
+    final XFile? newImage =
+        await ImagePicker().pickImage(source: ImageSource.camera);
+    if (newImage != null) {
       setState(() {
-        editedImages[index] = File(cropped.path);
+        editedImages.add(File(newImage.path));
+        currentIndex = editedImages.length - 1;
       });
     }
   }
 
-  void _rotateImage(int index) {
-    // Placeholder — implement rotation using image package later
+  void _applyFilter(String filterName) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Rotate feature coming soon')),
+      SnackBar(content: Text('$filterName filter applied (demo)')),
+    );
+  }
+
+  void _doneEditing() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All edits saved! (PDF creation next)')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final image = editedImages[currentIndex];
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Images')),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: editedImages.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: const EdgeInsets.only(bottom: 20),
-            child: Column(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'New Doc ${DateTime.now().toString().substring(0, 16)}',
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: _doneEditing,
+            child: const Text('Done', style: TextStyle(color: Colors.green)),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                Image.file(editedImages[index]),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => _cropImage(index),
-                      icon: const Icon(Icons.crop),
-                      label: const Text('Crop'),
+                Image.file(image, fit: BoxFit.contain),
+                if (currentIndex > 0)
+                  Positioned(
+                    left: 10,
+                    child: IconButton(
+                      onPressed: _previousImage,
+                      icon: const Icon(Icons.arrow_left,
+                          color: Colors.white, size: 40),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () => _rotateImage(index),
-                      icon: const Icon(Icons.rotate_right),
-                      label: const Text('Rotate'),
+                  ),
+                if (currentIndex < editedImages.length - 1)
+                  Positioned(
+                    right: 10,
+                    child: IconButton(
+                      onPressed: _nextImage,
+                      icon: const Icon(Icons.arrow_right,
+                          color: Colors.white, size: 40),
                     ),
-                  ],
-                ),
+                  ),
               ],
             ),
-          );
-        },
+          ),
+
+          // Bottom toolbar (filters and actions)
+          Container(
+            color: Colors.grey[900],
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _toolButton(Icons.camera, 'Retake', _addNewImage),
+                  _toolButton(Icons.add, 'Add', _addNewImage),
+                  _toolButton(Icons.filter, 'Magic Color',
+                      () => _applyFilter('Magic Color')),
+                  _toolButton(Icons.brightness_low, 'Lighten',
+                      () => _applyFilter('Lighten')),
+                  _toolButton(Icons.filter_b_and_w, 'Grayscale',
+                      () => _applyFilter('Grayscale')),
+                  _toolButton(Icons.crop, 'Crop', _cropImage),
+                  _toolButton(Icons.rotate_right, 'Rotate',
+                      () => _applyFilter('Rotate (demo)')),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _toolButton(IconData icon, String label, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: onTap,
+            icon: Icon(icon, color: Colors.white),
+          ),
+          Text(label,
+              style: const TextStyle(color: Colors.white, fontSize: 12)),
+        ],
       ),
     );
   }
