@@ -68,7 +68,7 @@ class _CameraPageState extends State<CameraPage> {
                   ),
           ),
 
-          // Bottom action bar (like in PDF apps)
+          // Bottom action bar
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
             color: Colors.grey[100],

@@ -2,6 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:pizel/screens/documents_page.dart';
+import 'package:share_plus/share_plus.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -112,9 +117,31 @@ class _EditPageState extends State<EditPage> {
     );
   }
 
-  void _doneEditing() {
+  void _doneEditing() async {
+    final pdf = pw.Document();
+
+    // Add each edited image to the PDF
+    for (var img in editedImages) {
+      final image = pw.MemoryImage(await img.readAsBytes());
+      pdf.addPage(pw.Page(build: (context) => pw.Center(child: pw.Image(image))));
+    }
+
+    // Save PDF in the device’s document directory
+    final outputDir = await getApplicationDocumentsDirectory();
+    final fileName = 'Doc_${DateTime.now().millisecondsSinceEpoch}.pdf';
+    final file = File('${outputDir.path}/$fileName');
+    await file.writeAsBytes(await pdf.save());
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('All edits saved! (PDF creation next)')),
+      SnackBar(content: Text('PDF saved: $fileName')),
+    );
+
+    // Navigate to the DocumentsPage to view saved PDFs
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DocumentsPage(),
+      ),
     );
   }
 
