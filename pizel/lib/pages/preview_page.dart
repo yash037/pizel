@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'dart:collection';
 import 'edit_page.dart';
 import '../utils/image_utils.dart';
-import '../models/image_node.dart';
-import '../widgets/image_grid.dart';
-import '../widgets/camer_action_bar.dart';
-import '../widgets/empty_state.dart';
+import '../utils/image_node.dart';
+import '../widgets/previewPage/image_grid.dart';
+import '../widgets/previewPage/camer_action_bar.dart';
+import '../widgets/previewPage/empty_state.dart';
 
-class CameraPage extends StatefulWidget {
-  const CameraPage({super.key});
+class PreviewPage extends StatefulWidget {
+  const PreviewPage({super.key});
 
   @override
-  State<CameraPage> createState() => _CameraPageState();
+  State<PreviewPage> createState() => _PreviewPageState();
 }
 
-class _CameraPageState extends State<CameraPage> {
+class _PreviewPageState extends State<PreviewPage> {
   final LinkedList<ImageNode> _images = LinkedList<ImageNode>();
 
   Future<void> _handleCapture() async {
@@ -24,6 +24,26 @@ class _CameraPageState extends State<CameraPage> {
       setState(() {
         _images.add(ImageNode(imageFile));
       });
+    }
+  }
+
+  Future<void> _handleImport() async {
+    // Pick single image from gallery
+    final File? imageFile = await ImageUtils.pickFromGallery();
+    if (imageFile != null) {
+      setState(() {
+        _images.add(ImageNode(imageFile));
+      });
+      
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Image imported successfully'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
     }
   }
 
@@ -55,7 +75,8 @@ class _CameraPageState extends State<CameraPage> {
           ),
           CameraActionBar(
             onCapture: _handleCapture,
-            onEdit: _goToEditPage,
+            onEdit: _goToEditPage, 
+            onImport: _handleImport,
           ),
         ],
       ),

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:collection';
-import '../models/image_node.dart';
+import '../../utils/image_node.dart';
 
 class ImageGrid extends StatelessWidget {
   final LinkedList<ImageNode> images;

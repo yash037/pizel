@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Homepage hesder
+/// Homepage header
 class HomeHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -39,71 +39,28 @@ class HomeHeader extends StatelessWidget {
   }
 }
 
-/// Camera & Import Button
+/// Get Started Button
 class HomeActionButtons extends StatelessWidget {
-  final VoidCallback onCameraPressed;
-  final VoidCallback onImportPressed;
+  final VoidCallback onGetStartedPressed;
 
   const HomeActionButtons({
     super.key,
-    required this.onCameraPressed,
-    required this.onImportPressed,
+    required this.onGetStartedPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        PrimaryActionButton(
-          onPressed: onCameraPressed,
-          icon: Icons.camera_alt,
-          label: 'Open Camera',
-        ),
-        const SizedBox(height: 20),
-        PrimaryActionButton(
-          onPressed: onImportPressed,
-          icon: Icons.file_upload,
-          label: 'Import Files',
-        ),
-      ],
+    return PrimaryActionButton(
+      onPressed: onGetStartedPressed,
+      icon: Icons.rocket_launch,
+      label: 'Get Started',
+      backgroundColor: Colors.deepPurple,
+      foregroundColor: Colors.white,
     );
   }
 }
 
-/// reuse them
-class PrimaryActionButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final IconData icon;
-  final String label;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-
-  const PrimaryActionButton({
-    super.key,
-    required this.onPressed,
-    required this.icon,
-    required this.label,
-    this.backgroundColor,
-    this.foregroundColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        minimumSize: const Size(200, 48),
-      ),
-    );
-  }
-}
-
-/// see downloads
+/// See documents button
 class BottomNavigationButton extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData icon;
@@ -132,6 +89,38 @@ class BottomNavigationButton extends StatelessWidget {
             fontSize: 16,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class PrimaryActionButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final IconData icon;
+  final String label;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+
+  const PrimaryActionButton({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+    this.backgroundColor,
+    this.foregroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(200, 48),
       ),
     );
   }
