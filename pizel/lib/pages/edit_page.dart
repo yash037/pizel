@@ -1,12 +1,11 @@
 import 'dart:io';
+import 'dart:collection';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:open_filex/open_filex.dart';
-import 'package:pizel/screens/documents_page.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:pizel/pages/documents_page.dart';
+import '../utils/image_utils.dart';
+import '../models/image_node.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -16,14 +15,13 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPageState extends State<CameraPage> {
-  final ImagePicker _picker = ImagePicker();
-  final List<File> _images = [];
+  final LinkedList<ImageNode> _images = LinkedList<ImageNode>();
 
   Future<void> _captureImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
+    final File? imageFile = await ImageUtils.captureImage();
+    if (imageFile != null) {
       setState(() {
-        _images.add(File(image.path));
+        _images.add(ImageNode(imageFile));
       });
 
       Navigator.push(
@@ -54,7 +52,7 @@ class _CameraPageState extends State<CameraPage> {
 }
 
 class EditPage extends StatefulWidget {
-  final List<File> images;
+  final LinkedList<ImageNode> images;
   const EditPage({super.key, required this.images});
 
   @override
@@ -63,7 +61,7 @@ class EditPage extends StatefulWidget {
 
 class _EditPageState extends State<EditPage> {
   int currentIndex = 0;
-  late List<File> editedImages;
+  late LinkedList<ImageNode> editedImages;
 
   @override
   void initState() {
@@ -72,19 +70,12 @@ class _EditPageState extends State<EditPage> {
   }
 
   Future<void> _cropImage() async {
-    final cropped = await ImageCropper().cropImage(
-      sourcePath: editedImages[currentIndex].path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Crop Image',
-          toolbarColor: Colors.black,
-          toolbarWidgetColor: Colors.white,
-          lockAspectRatio: false,
-        ),
-      ],
-    );
+    final currentNode = editedImages.elementAt(currentIndex);
+    final File? cropped = await ImageUtils.cropImage(currentNode.file);
     if (cropped != null) {
-      setState(() => editedImages[currentIndex] = File(cropped.path));
+      setState(() {
+        currentNode.file = cropped;
+      });
     }
   }
 
@@ -101,11 +92,10 @@ class _EditPageState extends State<EditPage> {
   }
 
   void _addNewImage() async {
-    final XFile? newImage =
-        await ImagePicker().pickImage(source: ImageSource.camera);
+    final File? newImage = await ImageUtils.captureImage();
     if (newImage != null) {
       setState(() {
-        editedImages.add(File(newImage.path));
+        editedImages.add(ImageNode(newImage));
         currentIndex = editedImages.length - 1;
       });
     }
@@ -121,12 +111,12 @@ class _EditPageState extends State<EditPage> {
     final pdf = pw.Document();
 
     // Add each edited image to the PDF
-    for (var img in editedImages) {
-      final image = pw.MemoryImage(await img.readAsBytes());
+    for (var node in editedImages) {
+      final image = pw.MemoryImage(await node.file.readAsBytes());
       pdf.addPage(pw.Page(build: (context) => pw.Center(child: pw.Image(image))));
     }
 
-    // Save PDF in the device’s document directory
+    // Save PDF in the device's document directory
     final outputDir = await getApplicationDocumentsDirectory();
     final fileName = 'Doc_${DateTime.now().millisecondsSinceEpoch}.pdf';
     final file = File('${outputDir.path}/$fileName');
@@ -147,7 +137,7 @@ class _EditPageState extends State<EditPage> {
 
   @override
   Widget build(BuildContext context) {
-    final image = editedImages[currentIndex];
+    final image = editedImages.elementAt(currentIndex).file;
 
     return Scaffold(
       backgroundColor: Colors.black,

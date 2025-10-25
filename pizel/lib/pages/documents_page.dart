@@ -32,8 +32,13 @@ class _DocumentsPageState extends State<DocumentsPage> {
     setState(() => _pdfFiles = files);
   }
 
-  void _openPdf(File file) {
-    OpenFilex.open(file.path);
+  void _openPdf(File file) async {
+    final result = await OpenFilex.open(file.path);
+    if (result.type != ResultType.done) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open PDF: ${result.message}')),
+      );
+    }
   }
 
   void _sharePdf(File file) {
@@ -41,11 +46,31 @@ class _DocumentsPageState extends State<DocumentsPage> {
   }
 
   void _deletePdf(File file) async {
-    await file.delete();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('PDF deleted')),
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete PDF?'),
+        content: const Text('This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
-    _loadSavedPdfs();
+
+    if (confirmed == true) {
+      await file.delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('PDF deleted')),
+      );
+      _loadSavedPdfs();
+    }
   }
 
   @override
