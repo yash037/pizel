@@ -7,6 +7,7 @@ import 'package:pizel/pages/documents_page.dart';
 import '../utils/image_utils.dart';
 import '../utils/image_node.dart';
 import '../widgets/editPage/edit_page_widgets.dart';
+import 'package:image/image.dart' as img;
 
 class EditPage extends StatefulWidget {
   final LinkedList<ImageNode> images;
@@ -78,6 +79,42 @@ class _EditPageState extends State<EditPage> {
     );
   }
 
+  void _handleRotate() async {
+    final currentNode = editedImages.elementAt(currentIndex);
+    final file = currentNode.file;
+
+    // Decode the file into an img.Image
+    final bytes = await file.readAsBytes();
+    final decoded = img.decodeImage(bytes);
+
+    if (decoded == null) return;
+
+    // Rotate 90 degrees clockwise
+    final rotated = img.copyRotate(decoded, angle: 90);
+
+    // Create a NEW file with a different path
+    final directory = file.parent;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final rotatedFile = File('${directory.path}/rotated_$timestamp.jpg')
+      ..writeAsBytesSync(img.encodeJpg(rotated));
+
+    // Delete old file if needed (optional)
+    // await file.delete();
+
+    // Update the linked list node with new file
+    setState(() {
+      currentNode.file = rotatedFile;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Image rotated successfully')),
+      );
+    }
+  }
+
+
+
   void _doneEditing() async {
     final pdf = pw.Document();
 
@@ -132,7 +169,7 @@ class _EditPageState extends State<EditPage> {
             onLighten: () => _applyFilter('Lighten'),
             onGrayscale: () => _applyFilter('Grayscale'),
             onCrop: _cropImage,
-            onRotate: () => _applyFilter('Rotate (demo)'),
+            onRotate: () => _handleRotate(),
           ),
         ],
       ),
