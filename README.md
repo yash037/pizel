@@ -13,11 +13,12 @@
 ### 🔹 Smart Detection Engine
 * **Hybrid AI:** Uses **YOLOv8** for object detection (context) and **OpenCV** for precise contouring.
 * **Multi-Method Fusion:** Runs Otsu, Adaptive Thresholding, and Canny Edge Detection in parallel to handle shadows and poor lighting conditions.
-* **Robust Fallbacks:** Implements a 4-level fallback system (including `find_best_contour` and `enhance_cropped_document`) to ensure scanning never fails.
+* **Robust Scoring System:** Selects the best contour using a formula: `Score = Area x Vertex_Score x Rectangularity`.
+* **Intelligent Fallbacks:** Implements a 4-level fallback system (including `find_best_contour` and `enhance_cropped_document`) to ensure scanning never fails.
 
 ### 🔹 Advanced Image Processing
 * **Perspective Correction:** Automatically warps and "straightens" skewed documents using a custom 4-point transform.
-* **Roll/Tilt Correction:** Detects text orientation and rotates the image to be perfectly horizontal.
+* **Roll/Tilt Correction:** Detects text orientation using Hough Lines and rotates the image to be perfectly horizontal.
 * **Enhancement Filters:** Includes "Magic Color" (CLAHE) and "Black & White" (Adaptive Gaussian) modes for superior readability.
 
 ### 🔹 PDF Management
@@ -30,10 +31,10 @@
 
 | Component | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Frontend** | Flutter (Dart) | UI, Camera Access, Local Storage, API Calls |
-| **Backend** | FastAPI (Python) | Image Processing Orchestration, API Endpoints |
-| **Core Logic** | OpenCV & YOLOv8 | Computer Vision, Object Detection, Warping |
-| **Communication**| HTTP Multipart | Efficient transfer of high-res images |
+| **Frontend** | Flutter (Dart) | UI, Camera Access, Local Storage, API Calls. |
+| **Backend** | FastAPI (Python) | Image Processing Orchestration, API Endpoints. |
+| **Core Logic** | OpenCV & YOLOv8 | Computer Vision, Object Detection, Warping. |
+| **Communication**| HTTP Multipart | Efficient transfer of high-res images via Base64 JSON. |
 
 ---
 
@@ -42,7 +43,6 @@
 ### Prerequisites
 * **Flutter SDK** installed.
 * **Python 3.8+** installed.
-* **Android Studio** or **VS Code**.
 
 ### 1. Backend Setup (Server)
 The backend handles the heavy image processing logic.
@@ -54,13 +54,40 @@ git clone [https://github.com/yourusername/pizel-scanner.git](https://github.com
 # Navigate to the backend directory
 cd backend
 
-# Create a virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-
 # Install dependencies
 pip install -r requirements.txt
 
 # Run the FastAPI server
 # The server will typically start on [http://127.0.0.1:8000](http://127.0.0.1:8000)
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 2. Frontend Setup (Mobile App)
+Ensure your backend server is running before starting the app.
+
+```bash
+# Navigate to the flutter app directory
+cd mobile_app
+
+# Install dependencies
+flutter pub get
+```
+
+**Important:** Update the API URL.
+1.  Find your computer's local IP address.
+2.  Open the API service file in `lib/` and update the `baseUrl` to point to your backend.
+
+```bash
+# Run the app
+flutter run
+```
+
+---
+
+## 👥 Contributors
+* **Vishnu Om**
+* **Yash Sharma**
+* **Utkarsh Singh**
+* **Syamala Nishita**
+
+*Mentored by Dr. Manoj Wairiya*
