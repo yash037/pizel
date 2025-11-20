@@ -12,23 +12,30 @@ class ChoicePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the color scheme from the theme
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      // No background color needed, it will use scaffoldBackgroundColor from the theme
       appBar: AppBar(
-        title: const Text('Choose Option'),
-        backgroundColor: Colors.white, // Set to white to match page
-        elevation: 0, // Remove shadow
+        // Use the theme's background color
+        backgroundColor: colorScheme.primary,
+        // Set the icon and text color to be visible on the light background
+        foregroundColor: colorScheme.onError,
+        elevation: 0, // Keep the shadow off
         centerTitle: true,
+        title: const Text('Choose Option'),
+        // The leading icon will automatically use the foregroundColor
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.deepPurple),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context), // Go back
         ),
-        
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: Colors.deepPurple, // Border color
-            height: 1, // Border thickness
+            // Use the secondary color for the border
+            color: colorScheme.secondary, 
+            height: 1,
           ),
         ),
       ),
@@ -52,14 +59,16 @@ class ChoicePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AutomatePdfPage(images: images),
+                          builder: (context) =>
+                              AutomatePdfPage(images: images),
                         ),
                       );
                     },
                     icon: Icons.auto_fix_high,
                     label: 'Automate PDF',
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
+                    // Use theme colors
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary, 
                   ),
                   const SizedBox(height: 24),
 
@@ -76,9 +85,13 @@ class ChoicePage extends StatelessWidget {
                     icon: const Icon(Icons.edit),
                     label: const Text('Manual'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[200],
-                      foregroundColor: Colors.black87,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      // Use theme colors
+                      backgroundColor:
+                          colorScheme.tertiary, 
+                      foregroundColor:
+                          colorScheme.onError,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
                       minimumSize: const Size(200, 48),
                     ),
                   ),

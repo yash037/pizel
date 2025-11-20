@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "iostream": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Users/yash6/Desktop/hh/pizel/linux"
 }

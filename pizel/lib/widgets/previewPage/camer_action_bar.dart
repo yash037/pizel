@@ -14,12 +14,12 @@ class CameraActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -36,7 +36,10 @@ class CameraActionBar extends StatelessWidget {
               onPressed: onCapture,
               icon: Icons.camera_alt,
               label: 'Capture',
-              color: Colors.blueAccent,
+              fontSize: 13.5,
+              // ✅ USES kSecondaryBlue (via theme)
+              backgroundColor: colorScheme.secondary,
+              foregroundColor: colorScheme.onSecondary,
             ),
           ),
           const SizedBox(width: 10),
@@ -45,21 +48,24 @@ class CameraActionBar extends StatelessWidget {
               onPressed: onImport,
               icon: Icons.file_upload,
               label: 'Import',
-              color: Colors.orangeAccent,
+              // ✅ USES kAccentMint (via theme)
+              backgroundColor: colorScheme.tertiary,
+              foregroundColor: colorScheme.onError,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: onEdit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
               padding: const EdgeInsets.all(14),
               elevation: 2,
             ),
-            child: const Icon(Icons.arrow_forward, color: Colors.white, size: 26),
+            child: const Icon(Icons.arrow_forward, size: 26),
           ),
         ],
       ),
@@ -72,13 +78,17 @@ class ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color? backgroundColor;
+  final Color? foregroundColor;
+  final double? fontSize;
 
   const ActionButton({
     super.key,
     required this.onPressed,
     required this.icon,
     required this.label,
-    this.backgroundColor, required MaterialAccentColor color,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.fontSize,
   });
 
   @override
@@ -86,9 +96,11 @@ class ActionButton extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon),
-      label: Text(label),
+      label: Text(label, style: TextStyle(fontSize: fontSize),),
+      
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ),
     );

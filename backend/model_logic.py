@@ -495,6 +495,11 @@ def scan_document_optimized(image_path, model_path="yolov8n.pt",
         return processed
     else:
         print("❌ Document processing failed")
+        final_fallback_image = orig
+        cv2.imwrite(save_path, final_fallback_image)
+        display_results(orig, final_fallback_image, "original (fallback)", "Failed Document Detection")
+        print(f"💾 Saved original image as fallback at {save_path}")
+        return final_fallback_image
         return None
 
 def enhance_cropped_document(cropped):

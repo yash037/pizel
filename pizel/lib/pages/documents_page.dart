@@ -48,20 +48,24 @@ class _DocumentsPageState extends State<DocumentsPage> {
   void _deletePdf(File file) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete PDF?'),
-        content: const Text('This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return AlertDialog(
+          title: const Text('Delete PDF?'),
+          content: const Text('This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              // ✅ Now this line is valid and will work
+              child: Text('Delete', style: TextStyle(color: colorScheme.error)),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true) {
@@ -75,27 +79,28 @@ class _DocumentsPageState extends State<DocumentsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the colorScheme here for the build method
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            // yeh bhi kr skte h incase upar wala nhi kaam kre toh
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(builder: (_) => const HomePage()),
-            // );
           },
         ),
         title: const Text('My Documents'),
+        // ✅ This correctly uses the appBarTheme from main.dart
       ),
-
       body: _pdfFiles.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
                 'No documents found',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: colorScheme.secondary,
+                ),
               ),
             )
           : ListView.builder(
@@ -108,8 +113,10 @@ class _DocumentsPageState extends State<DocumentsPage> {
                   margin:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: ListTile(
-                    leading: const Icon(Icons.picture_as_pdf,
-                        color: Colors.redAccent),
+                    leading: Icon(
+                      Icons.picture_as_pdf,
+                      color: colorScheme.error,
+                    ),
                     title: Text(fileName),
                     subtitle: Text(
                         'Modified: ${file.statSync().modified.toLocal().toString().substring(0, 16)}'),

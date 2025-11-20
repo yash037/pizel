@@ -7,18 +7,29 @@ class HomeHeader extends StatelessWidget {
 
   const HomeHeader({
     super.key,
-    this.title = 'Welcome to Pizel App',
+    this.title = 'Effortless Smart Scanning.',
     this.subtitle,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Get the theme
+    final theme = Theme.of(context);
+
     return Column(
       children: [
+        Image.asset(
+          'assets/images/logo.png',
+          height: 250, 
+        ),
+
+        const SizedBox(height: 24),
+
+        // (This is your existing code)
         Text(
           title,
           style: const TextStyle(
-            fontSize: 24,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
@@ -29,7 +40,7 @@ class HomeHeader extends StatelessWidget {
             subtitle!,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: theme.colorScheme.secondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -54,8 +65,6 @@ class HomeActionButtons extends StatelessWidget {
       onPressed: onGetStartedPressed,
       icon: Icons.rocket_launch,
       label: 'Get Started',
-      backgroundColor: Colors.deepPurple,
-      foregroundColor: Colors.white,
     );
   }
 }
@@ -65,27 +74,27 @@ class BottomNavigationButton extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData icon;
   final String label;
-  final Color? color;
 
   const BottomNavigationButton({
     super.key,
     required this.onPressed,
     this.icon = Icons.folder,
     this.label = 'See Documents',
-    this.color = Colors.deepPurple,
   });
 
   @override
   Widget build(BuildContext context) {
+    final secondaryColor = Theme.of(context).colorScheme.secondary;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: TextButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, color: color),
+        icon: Icon(icon, color: secondaryColor),
         label: Text(
           label,
           style: TextStyle(
-            color: color,
+            color: secondaryColor, 
             fontSize: 16,
           ),
         ),
@@ -94,6 +103,7 @@ class BottomNavigationButton extends StatelessWidget {
   }
 }
 
+// This widget is already correct and flexible. No changes needed.
 class PrimaryActionButton extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData icon;

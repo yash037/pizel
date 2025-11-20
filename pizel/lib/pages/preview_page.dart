@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:collection';
 import '../widgets/previewPage/image_grid.dart';
 import '../widgets/previewPage/camer_action_bar.dart';
@@ -28,22 +29,42 @@ class _PreviewPageState extends State<PreviewPage> {
   }
 
   Future<void> _handleImport() async {
-    final File? imageFile = await ImageUtils.pickFromGallery();
-    if (imageFile != null) {
-      setState(() {
-        _images.add(ImageNode(imageFile));
-      });
+  final ImagePicker picker = ImagePicker();
+  // 1. Use pickMultiImage() for multiple selections
+  final List<XFile> pickedFiles = await picker.pickMultiImage();
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Image imported successfully'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
+  if (pickedFiles.isNotEmpty) {
+    // 2. Iterate over the picked files
+    final List<ImageNode> newImages = pickedFiles.map((xFile) {
+      // Convert XFile to dart:io File
+      return ImageNode(File(xFile.path));
+    }).toList();
+
+    // Assuming _images is a List<ImageNode> in your State
+    setState(() {
+      _images.addAll(newImages); // Add all new images
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${newImages.length} images imported successfully'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  } else {
+    // Handle the case where the user cancels the selection
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Image selection cancelled'),
+          duration: Duration(seconds: 1),
+        ),
+      );
     }
   }
+}
 
   void _goToChoicePage() {
     if (_images.isNotEmpty) {

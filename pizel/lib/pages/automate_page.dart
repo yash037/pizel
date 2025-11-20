@@ -3,11 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import '../utils/image_node.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:pdf/widgets.dart' as pw;
-import './documents_page.dart';
+import './edit_page.dart';
 
 class AutomatePdfPage extends StatefulWidget {
   final LinkedList<ImageNode> images;
@@ -21,15 +19,14 @@ class AutomatePdfPage extends StatefulWidget {
 class _AutomatePdfPageState extends State<AutomatePdfPage> {
   bool _isLoading = false;
   List<File> _processedImages = [];
-
+ 
   Future<void> _sendImagesToServer() async {
     setState(() => _isLoading = true);
     try {
-
       var request = http.MultipartRequest(
         'POST',
         // Uri.parse('http://10.0.2.2:8000/process-multiple'), // for offline emulator
-        Uri.parse('http://127.0.0.1:8000/process-multiple'), // for wireless or basic 
+        Uri.parse('http://127.0.0.1:8000/process-multiple'), // for wireless or basic
       );
 
       // Add all images as MultipartFiles
@@ -77,7 +74,6 @@ class _AutomatePdfPageState extends State<AutomatePdfPage> {
     }
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -87,44 +83,35 @@ class _AutomatePdfPageState extends State<AutomatePdfPage> {
   void onDone() async {
     if (_processedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No processed images to save')),
+        const SnackBar(content: Text('No processed images to edit')),
       );
       return;
     }
 
-    final pdf = pw.Document();
-
+    // 1. Create a new LinkedList from the processed files
+    final LinkedList<ImageNode> processedImageList = LinkedList<ImageNode>();
     for (var file in _processedImages) {
-      final image = pw.MemoryImage(await file.readAsBytes());
-      pdf.addPage(pw.Page(build: (context) => pw.Center(child: pw.Image(image))));
+      // Assuming ImageNode has a constructor that accepts File
+      processedImageList.add(ImageNode(file));
     }
-
-    final outputDir = await getApplicationDocumentsDirectory();
-    final fileName = 'Doc_${DateTime.now().millisecondsSinceEpoch}.pdf';
-    final file = File('${outputDir.path}/$fileName');
-    await file.writeAsBytes(await pdf.save());
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('PDF saved: $fileName')),
-    );
-
-    // Navigate to DocumentsPage
+    
+    // 2. Navigate to EditPage
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const DocumentsPage(),
+        // Pass the new LinkedList of processed images to the EditPage
+        builder: (_) => EditPage(images: processedImageList), 
       ),
     );
   }
 
-
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Automate PDF'),
-        backgroundColor: Colors.deepPurple,
+        // ✅ REMOVED: backgroundColor: Colors.teal
+        // This will now use the appBarTheme from main.dart
       ),
       body: Column(
         children: [
@@ -132,8 +119,10 @@ class _AutomatePdfPageState extends State<AutomatePdfPage> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: _isLoading
+                  // ✅ This will automatically use your theme's primary color
                   ? const Center(child: CircularProgressIndicator())
                   : _processedImages.isEmpty
+                      // ✅ This will automatically use your theme's onBackground color
                       ? const Center(child: Text('No processed images'))
                       : GridView.builder(
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -159,12 +148,15 @@ class _AutomatePdfPageState extends State<AutomatePdfPage> {
               child: ElevatedButton(
                 onPressed: onDone,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  // ✅ REMOVED: backgroundColor: Colors.teal
+                  // This will now use the elevatedButtonTheme from main.dart
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text(
                   'Done',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  // ✅ REMOVED: color: Colors.white
+                  // The theme will handle the text color
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
             ),
@@ -173,5 +165,4 @@ class _AutomatePdfPageState extends State<AutomatePdfPage> {
       ),
     );
   }
-
 }

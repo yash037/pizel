@@ -18,20 +18,24 @@ class EditPageAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
-      backgroundColor: Colors.black,
+      // ✅ Use theme's primary color (kPrimaryDark)
+      backgroundColor: colorScheme.primary,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        // ✅ Use theme's "on primary" color (kAppBackground)
+        icon: Icon(Icons.arrow_back, color: colorScheme.onPrimary),
         onPressed: onBack,
       ),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontSize: 16),
+        style: TextStyle(color: colorScheme.onPrimary, fontSize: 16),
       ),
       actions: [
         TextButton(
           onPressed: onDone,
-          child: const Text('Done', style: TextStyle(color: Colors.green)),
+          // ✅ Use theme's secondary color (kSecondaryBlue) for accent
+          child: Text('Done', style: TextStyle(color: colorScheme.secondary)),
         ),
       ],
     );
@@ -60,6 +64,9 @@ class ImageViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the color scheme for this widget
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -69,9 +76,10 @@ class ImageViewer extends StatelessWidget {
             left: 10,
             child: IconButton(
               onPressed: onPrevious,
-              icon: const Icon(Icons.arrow_left, color: Colors.white, size: 40),
+              icon: Icon(Icons.arrow_left,
+                  color: colorScheme.onPrimary, size: 40), 
               style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withOpacity(0.5),
+                backgroundColor: colorScheme.primary.withOpacity(0.5),
               ),
             ),
           ),
@@ -80,9 +88,10 @@ class ImageViewer extends StatelessWidget {
             right: 10,
             child: IconButton(
               onPressed: onNext,
-              icon: const Icon(Icons.arrow_right, color: Colors.white, size: 40),
+              icon: Icon(Icons.arrow_right,
+                  color: colorScheme.onPrimary, size: 40), 
               style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withOpacity(0.5),
+                backgroundColor: colorScheme.primary.withOpacity(0.5),
               ),
             ),
           ),
@@ -115,7 +124,7 @@ class EditToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[900],
+      color: Theme.of(context).colorScheme.primary, 
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -124,11 +133,17 @@ class EditToolbar extends StatelessWidget {
           children: [
             ToolButton(icon: Icons.camera, label: 'Retake', onTap: onRetake),
             ToolButton(icon: Icons.add, label: 'Add', onTap: onAdd),
-            ToolButton(icon: Icons.filter, label: 'Magic Color', onTap: onMagicColor),
-            ToolButton(icon: Icons.brightness_low, label: 'Lighten', onTap: onLighten),
-            ToolButton(icon: Icons.filter_b_and_w, label: 'Grayscale', onTap: onGrayscale),
+            ToolButton(
+                icon: Icons.filter, label: 'Magic Color', onTap: onMagicColor),
+            ToolButton(
+                icon: Icons.brightness_low, label: 'Lighten', onTap: onLighten),
+            ToolButton(
+                icon: Icons.filter_b_and_w,
+                label: 'Grayscale',
+                onTap: onGrayscale),
             ToolButton(icon: Icons.crop, label: 'Crop', onTap: onCrop),
-            ToolButton(icon: Icons.rotate_right, label: 'Rotate', onTap: onRotate),
+            ToolButton(
+                icon: Icons.rotate_right, label: 'Rotate', onTap: onRotate),
           ],
         ),
       ),
@@ -151,6 +166,9 @@ class ToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the "on primary" color from the theme
+    final onPrimaryColor = Theme.of(context).colorScheme.onPrimary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -158,11 +176,12 @@ class ToolButton extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onTap,
-            icon: Icon(icon, color: Colors.white),
+            icon: Icon(icon, color: onPrimaryColor), 
           ),
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style:
+                TextStyle(color: onPrimaryColor, fontSize: 12), 
           ),
         ],
       ),
